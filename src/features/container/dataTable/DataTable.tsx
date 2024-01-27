@@ -9,11 +9,14 @@ import {
   ListItemText,
   ListSubheader,
   Snackbar,
+  Tooltip,
 } from '@mui/material';
 import styles from './dataTable.module.css';
 import { Fragment, useEffect, useState } from 'react';
 import BasicDatePicker from './datePicker/DatePicker';
 import SubmitButton from './submit/SubmitButton';
+import CheckCircleOutlinedIcon from '@mui/icons-material/CheckCircleOutlined';
+import RadioButtonUncheckedOutlinedIcon from '@mui/icons-material/RadioButtonUncheckedOutlined';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../../../redux/store';
 import {
@@ -26,7 +29,7 @@ import axios from 'axios';
 const {} = styles;
 
 const DataTable = () => {
-  const [open, setOpen] = useState({
+  const [notification, setNotification] = useState({
     open: false,
     message: '',
   });
@@ -42,7 +45,11 @@ const DataTable = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const res: ResType = await axios.get('http://localhost:8080/tables');
+        const res: ResType = await axios.get(
+          // 'http://192.168.1.119:8080/tables'
+          'http://localhost:8080/tables'
+        );
+        if (!res.data.length) throw new Error('Server connection error');
         dispatch(
           setTableData(
             res.data.map((table) => ({
@@ -56,8 +63,7 @@ const DataTable = () => {
           )
         );
       } catch (error: any) {
-        console.log(error.message);
-        setOpen({ open: true, message: error.message });
+        setNotification({ open: true, message: error.message });
       } finally {
         setLoading(false);
       }
@@ -66,7 +72,7 @@ const DataTable = () => {
   }, []);
 
   const handleClose = () => {
-    setOpen({ open: false, message: '' });
+    setNotification({ ...notification, open: false });
   };
 
   return (
@@ -92,18 +98,7 @@ const DataTable = () => {
         )}
         {tableData.map((table, index) => (
           <Fragment key={table.name}>
-            <ListItem>
-              <Checkbox
-                indeterminate={
-                  table.columns.some((column) => column.checked) &&
-                  !table.columns.every((column) => column.checked)
-                }
-                onChange={(e) => {
-                  dispatch(checkTable({ index, checked: e.target.checked }));
-                }}
-                checked={table.columns.every((column) => column.checked)}
-              />
-              <ListItemText primary={table.name} />
+            <ListItem sx={{ borderTop: '2px solid black' }}>
               {table.collapse ? (
                 <ExpandLess
                   sx={{ cursor: 'pointer' }}
@@ -115,12 +110,38 @@ const DataTable = () => {
                   onClick={() => dispatch(setCollapse(index))}
                 />
               )}
+              <Checkbox
+                disableRipple
+                indeterminate={
+                  table.columns.some((column) => column.checked) &&
+                  !table.columns.every((column) => column.checked)
+                }
+                onChange={(e) => {
+                  dispatch(checkTable({ index, checked: e.target.checked }));
+                }}
+                checked={table.columns.every((column) => column.checked)}
+              />
+              <Tooltip
+                placement="top-start"
+                title={table.name.length > 10 ? table.name : null}
+                arrow
+              >
+                <ListItemText
+                  primary={
+                    table.name.length > 10
+                      ? table.name.slice(0, 10) + '...'
+                      : table.name
+                  }
+                />
+              </Tooltip>
             </ListItem>
             <Collapse in={table.collapse} timeout="auto" unmountOnExit>
               <List component="div" disablePadding>
                 {table.columns.map((column, columnIndex) => (
-                  <ListItem key={column.column} sx={{ paddingLeft: 4 }}>
+                  <ListItem key={column.column} sx={{ paddingLeft: 6 }}>
                     <Checkbox
+                      disableRipple
+                      size="small"
                       checked={column.checked}
                       onChange={(e) => {
                         dispatch(
@@ -143,14 +164,18 @@ const DataTable = () => {
 
       <BasicDatePicker />
       <SubmitButton />
-      <Snackbar open={open.open} autoHideDuration={6000} onClose={handleClose}>
+      <Snackbar
+        open={notification.open}
+        autoHideDuration={3000}
+        onClose={handleClose}
+      >
         <Alert
           onClose={handleClose}
           severity="error"
           variant="filled"
           sx={{ width: '100%' }}
         >
-          {open.message}
+          {notification.message}
         </Alert>
       </Snackbar>
     </div>

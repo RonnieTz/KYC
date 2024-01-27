@@ -36,7 +36,6 @@ const appSlice = createSlice({
       state.tableData = action.payload;
     },
     setCollapse: (state, action) => {
-      console.log(action.payload);
       state.tableData[action.payload].collapse =
         !state.tableData[action.payload].collapse;
     },

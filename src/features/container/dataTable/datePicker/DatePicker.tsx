@@ -1,4 +1,4 @@
-import dayjs, { Dayjs } from 'dayjs';
+import dayjs from 'dayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { Box, Checkbox, FormControlLabel, Typography } from '@mui/material';
@@ -9,14 +9,20 @@ import {
   setTimeStart,
   setTimeEnd,
 } from '../../../../redux/appSlice';
-import { MobileDateTimePicker } from '@mui/x-date-pickers';
+import { DateTimePicker, MobileDateTimePicker } from '@mui/x-date-pickers';
 
 export default function DatePickerValue() {
   const dispatch = useDispatch();
   const { fullLoading, time } = useSelector((state: RootState) => state.app);
 
   return (
-    <Box display={'flex'} flexDirection={'column'} gap={2} width={'100%'}>
+    <Box
+      display={'flex'}
+      flexDirection={'column'}
+      gap={2}
+      width={'100%'}
+      boxShadow={'0 0 30px 0 lightgrey inset'}
+    >
       <FormControlLabel
         sx={{ marginLeft: 2 }}
         control={
