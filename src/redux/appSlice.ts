@@ -4,7 +4,17 @@ const initialState: {
   time: { start: number; end: number };
   fullLoading: boolean;
   selectedTables: string[];
-  gridData: { columns: string[]; data: {}[]; checkedColumns: string[] };
+  gridData: {
+    columns: string[];
+    data: {}[];
+    checkedColumns: string[];
+    loading: boolean;
+    notification: {
+      show: boolean;
+      message: string;
+      type: 'success' | 'error';
+    };
+  };
   tableData: {
     collapse: boolean;
     columns: {
@@ -17,7 +27,13 @@ const initialState: {
   fullLoading: false,
   tableData: [],
   selectedTables: [],
-  gridData: { columns: [], data: [], checkedColumns: [] },
+  gridData: {
+    columns: [],
+    data: [],
+    checkedColumns: [],
+    loading: false,
+    notification: { show: false, message: '', type: 'success' },
+  },
   time: {
     start: new Date('2020-01-01 00:00').getTime(),
     end: new Date().getTime(),
@@ -99,6 +115,13 @@ const appSlice = createSlice({
     setTimeEnd: (state, action) => {
       state.time.end = action.payload;
     },
+    setGridDataLoading: (state, action) => {
+      state.gridData.loading = action.payload;
+    },
+
+    setGridDataNotification: (state, action) => {
+      state.gridData.notification = action.payload;
+    },
   },
   extraReducers: (_builder) => {},
 });
@@ -117,5 +140,7 @@ export const {
   unCheckAllTables,
   setTimeStart,
   setTimeEnd,
+  setGridDataLoading,
+  setGridDataNotification,
 } = appSlice.actions;
 export default appSlice.reducer;

@@ -15,8 +15,6 @@ import styles from './dataTable.module.css';
 import { Fragment, useEffect, useState } from 'react';
 import BasicDatePicker from './datePicker/DatePicker';
 import SubmitButton from './submit/SubmitButton';
-import CheckCircleOutlinedIcon from '@mui/icons-material/CheckCircleOutlined';
-import RadioButtonUncheckedOutlinedIcon from '@mui/icons-material/RadioButtonUncheckedOutlined';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../../../redux/store';
 import {
@@ -82,7 +80,7 @@ const DataTable = () => {
           width: '100%',
           maxWidth: 360,
           bgcolor: 'background.paper',
-          overflowY: 'scroll',
+          overflowY: 'auto',
           flexGrow: 1,
         }}
         component="nav"
@@ -123,12 +121,12 @@ const DataTable = () => {
               />
               <Tooltip
                 placement="top-start"
-                title={table.name.length > 10 ? table.name : null}
+                title={table.name.length > 13 ? table.name : null}
                 arrow
               >
                 <ListItemText
                   primary={
-                    table.name.length > 10
+                    table.name.length > 13
                       ? table.name.slice(0, 10) + '...'
                       : table.name
                   }
@@ -153,7 +151,19 @@ const DataTable = () => {
                         );
                       }}
                     />
-                    <ListItemText primary={column.column} />
+                    <Tooltip
+                      placement="top-start"
+                      title={column.column.length > 13 ? column.column : null}
+                      arrow
+                    >
+                      <ListItemText
+                        primary={
+                          column.column.length > 13
+                            ? column.column.slice(0, 10) + '...'
+                            : column.column
+                        }
+                      />
+                    </Tooltip>
                   </ListItem>
                 ))}
               </List>

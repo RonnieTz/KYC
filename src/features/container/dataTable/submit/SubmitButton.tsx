@@ -1,14 +1,19 @@
-import { Button } from '@mui/material';
+import { Alert, Button, Snackbar } from '@mui/material';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../../../../redux/store';
-import { setGridDataColumns, setGridData } from '../../../../redux/appSlice';
+import {
+  setGridDataColumns,
+  setGridData,
+  setGridDataLoading,
+  setGridDataNotification,
+} from '../../../../redux/appSlice';
 import { nanoid } from '@reduxjs/toolkit';
 import dayjs from 'dayjs';
 import axios from 'axios';
 
 const SubmitButton = () => {
   const dispatch = useDispatch();
-  const { tableData, time, fullLoading } = useSelector(
+  const { tableData, time, fullLoading, gridData } = useSelector(
     (state: RootState) => state.app
   );
 
@@ -50,6 +55,7 @@ const SubmitButton = () => {
     console.log(data);
 
     try {
+      dispatch(setGridDataLoading(true));
       const res = await axios.post(
         // 'http://192.168.1.119:8080/tables',
         'http://localhost:8080/tables',
@@ -58,23 +64,67 @@ const SubmitButton = () => {
       dispatch(
         setGridData(res.data.map((item: any) => ({ ...item, id: nanoid() })))
       );
+      dispatch(
+        setGridDataNotification({
+          show: true,
+          message: 'Data loaded successfully',
+          type: 'success',
+        })
+      );
       console.log(res.data);
-    } catch (e) {
+    } catch (e: any) {
       console.log(e);
+      dispatch(
+        setGridDataNotification({
+          show: true,
+          message: 'Error: ' + e.message,
+          type: 'error',
+        })
+      );
+    } finally {
+      dispatch(setGridDataLoading(false));
     }
   };
 
+  const handleClose = () => {
+    dispatch(
+      setGridDataNotification({ ...gridData.notification, show: false })
+    );
+  };
+
   return (
-    <Button
-      disabled={tableData.every((table) =>
-        table.columns.every((column) => !column.checked)
-      )}
-      sx={{ paddingTop: 1, borderRadius: 0 }}
-      variant="contained"
-      onClick={postData}
-    >
-      LOAD
-    </Button>
+    <>
+      <Button
+        disabled={
+          tableData.every((table) =>
+            table.columns.every((column) => !column.checked)
+          ) || gridData.loading
+        }
+        sx={{ paddingTop: 1, borderRadius: 0 }}
+        variant="contained"
+        onClick={postData}
+      >
+        {gridData.loading ? 'LOADING...' : 'LOAD'}
+      </Button>
+      <Snackbar
+        open={gridData.notification.show}
+        autoHideDuration={
+          gridData.notification.type === 'success' ? 2000 : 5000
+        }
+        onClose={handleClose}
+      >
+        <Alert
+          onClose={handleClose}
+          severity={
+            gridData.notification.type === 'success' ? 'success' : 'error'
+          }
+          variant="filled"
+          sx={{ width: '100%' }}
+        >
+          {gridData.notification.message}
+        </Alert>
+      </Snackbar>
+    </>
   );
 };
 export default SubmitButton;
